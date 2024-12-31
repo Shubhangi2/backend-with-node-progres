@@ -11,7 +11,7 @@ app.get("/", (req, res)=>{
 
 app.get("/notes",async (req, res)=>{
     try {
-        const data = await pool.query('SELECT * FROM schools')
+        const data = await pool.query('SELECT * FROM notes')
         res.status(200).send(data.rows)
     } catch (err) {
         console.log(err)
@@ -21,9 +21,9 @@ app.get("/notes",async (req, res)=>{
 
 
 
-app.get("/setup",async (req, res)=>{
+app.post("/setup",async (req, res)=>{
     try{
-        await pool.query('CREATE TABLE(id SERIAL PRIMARY KEY, title VARCHAR(200), content VARCHAR(1000))')
+        await pool.query('CREATE TABLE notes(id SERIAL PRIMARY KEY, title VARCHAR(200), content VARCHAR(1000))')
         res.status(200).send({ message: "Successfully created table" })
     }catch(e){
         console.log(e)
@@ -34,7 +34,7 @@ app.get("/setup",async (req, res)=>{
 app.post('/insert', async (req, res) => {
     const { title, content } = req.body
     try {
-        await pool.query('INSERT INTO schools (title, content) VALUES ($1, $2)', [title, content])
+        await pool.query('INSERT INTO notes (title, content) VALUES ($1, $2)', [title, content])
         res.status(200).send({ message: "Successfully added note" })
     } catch (err) {
         console.log(err)
