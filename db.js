@@ -1,7 +1,7 @@
 const { Pool } = require('pg')
 
 const pool = new Pool({
-    host: 'database',  // This is correct for container-to-container communication
+    host: 'localhost',  // This is correct for container-to-container communication
     port: 5432,        // Keep as 5432 for internal communication
     user: 'postgres',
     password: 'postgres',
