@@ -1,9 +1,16 @@
 const express = require("express")
 const pool = require("./db")
+const cors = require('cors')
 const port = 8000
 const app = express()
 
 app.use(express.json())
+
+app.use(
+    cors({
+      origin: "*",
+    })
+  );
 
 app.get("/", (req, res)=>{
     res.send("hello buddy! welcome to backend server")
@@ -21,23 +28,13 @@ app.get("/notes",async (req, res)=>{
 
 
 
-app.get("/setup",async (req, res)=>{
-    try{
-        await pool.query('CREATE TABLE notes(id SERIAL PRIMARY KEY, title VARCHAR(200), content VARCHAR(1000), createdAt VARCHAR(30), updatedAt VARCHAR(30))')
-        res.status(200).send({ message: "Successfully created table" })
-    }catch(e){
-        console.log(e)
-        res.sendStatus(500)
-    }
-})
-
 app.post("/delete",async (req, res)=>{
     var {id} = req.body
     if(!id){
         return res.status(400).send({message: "missing required field id"})
     }
     try{
-        await pool.query(`DELETE FROM notes WHERE id = ${id}`)
+        await pool.query("DELETE FROM notes WHERE id = $1", [id]); 
         res.status(200).send({ message: "note deleted successfully" })
     }catch(e){
         console.log(e)
@@ -73,8 +70,8 @@ app.post('/insert', async (req, res) => {
     }
     try {
         var createddAt = new Date()
-        await pool.query('INSERT INTO notes (title, content, createdAt, updatedAt) VALUES ($1, $2, $3, $4)', [title, content,createddAt,createddAt])
-        res.status(200).send({ message: "Successfully added note" })
+        var result = await pool.query('INSERT INTO notes (title, content, createdAt, updatedAt) VALUES ($1, $2, $3, $4)RETURNING *', [title, content,createddAt,createddAt])
+        res.status(200).send(result.rows[0])
     } catch (err) {
         console.log(err)
         res.sendStatus(500)
@@ -82,5 +79,5 @@ app.post('/insert', async (req, res) => {
 })
 
 app.listen(port, ()=>{
-    console.log(   `server running on port : ${port}`)
+    console.log(`server running on port : ${port}`)
 })
